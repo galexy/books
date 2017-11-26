@@ -215,34 +215,34 @@ Action]] instead.
   Parents act as supervisors and decide how to deal with the failure of a child
   actor (resume, restart, stop)
 
-|---------+---------------------+-------------------+---------------------------------|
-| Phase   | Triggered           | Lifecycle methods | Description                     |
-|         | by                  | involved          |                                 |
-|---------+---------------------+-------------------+---------------------------------|
-| Start   | Call to ~actorOf~   | ~preStart~        | The actor's path is reserved, \ |
-|         |                     |                   | the actor instance is created   |
-|         |                     |                   | and the ~preStart~ hook is      |
-|         |                     |                   | called.                         |
-|---------+---------------------+-------------------+---------------------------------|
-| Resume  | A supervisor, if it |                   | If an actor crashes the         |
-|         | decides to do so    |                   | supervisor process kicks in     |
-|         |                     |                   | and the actor is suspended.     |
-|         |                     |                   | The supervisor may decide to    |
-|         |                     |                   | resume an actor's execution     |
-|---------+---------------------+-------------------+---------------------------------|
-| Restart | A supervisor, if it | ~preStart~ and    | Default behavior on failure.    |
-|         | decides to do so    | ~postRestart~     | Actor path remains the same     |
-|         |                     |                   | and a new instance is created.  |
-|         |                     |                   | Messages in the inbox are       |
-|         |                     |                   | still there, but actor state    |
-|         |                     |                   | is flushed out.                 |
-|---------+---------------------+-------------------+---------------------------------|
-| Stop    | Call to             | ~postStop~        | When an actor is stopped,       |
-|         | ~context.stop()~    |                   | actors who watching will        |
-|         | or receive a        |                   | receive a Terminated message    |
-|         | ~PosionPill~        |                   |                                 |
-|         | message             |                   |                                 |
-|---------+---------------------+-------------------+---------------------------------|
+|---------+---------------------+-------------------+--------------------------------|
+| Phase   | Triggered           | Lifecycle methods | Description                    |
+|         | by                  | involved          |                                |
+|---------+---------------------+-------------------+--------------------------------|
+| Start   | Call to ~actorOf~   | ~preStart~        | The actor's path is reserved,  |
+|         |                     |                   | the actor instance is created  |
+|         |                     |                   | and the ~preStart~ hook is     |
+|         |                     |                   | called.                        |
+|---------+---------------------+-------------------+--------------------------------|
+| Resume  | A supervisor, if it |                   | If an actor crashes the        |
+|         | decides to do so    |                   | supervisor process kicks in    |
+|         |                     |                   | and the actor is suspended.    |
+|         |                     |                   | The supervisor may decide to   |
+|         |                     |                   | resume an actor's execution    |
+|---------+---------------------+-------------------+--------------------------------|
+| Restart | A supervisor, if it | ~preStart~ and    | Default behavior on failure.   |
+|         | decides to do so    | ~postRestart~     | Actor path remains the same    |
+|         |                     |                   | and a new instance is created. |
+|         |                     |                   | Messages in the inbox are      |
+|         |                     |                   | still there, but actor state   |
+|         |                     |                   | is flushed out.                |
+|---------+---------------------+-------------------+--------------------------------|
+| Stop    | Call to             | ~postStop~        | When an actor is stopped,      |
+|         | ~context.stop()~    |                   | actors who watching will       |
+|         | or receive a        |                   | receive a Terminated message   |
+|         | ~PosionPill~        |                   |                                |
+|         | message             |                   |                                |
+|---------+---------------------+-------------------+--------------------------------|
 
 - Unhandled messages can be intercepted by the ~unhandled~ method
 #+BEGIN_SRC scala
