@@ -1,0 +1,75 @@
+* Building Microservices - Designing Fine-Grained Systems
+:PROPERTIES:
+:Title: Building Microservices: Designing Fine-Grained Systems
+:Edition: 1st
+:Author: [[https://www.amazon.com/Sam-Newman/e/B01B76VPKO/ref=dp_byline_cont_book_1][Sam Newman]]
+:ISBN-13: 978-1-491-95035-7
+:ISBN-10: 9-781491-950357
+:END:
+
+** Notes
+*** Chapter 1 - Microservices
+Microservices evolved from Domain-Driven Design, continuous delivery, on-demand
+virtualization, infrastructure automation, systems at scale and the need for
+smaller autonomous teams. ~Microservices~ are small, autonomous services that
+work together.
+
+**** Autonomous
+All communication between service are via network calls to enforce separation
+between the services and avoid tight coupling. Services are independent of each
+other. They can be deployed by themselves without requiring consumers to change.
+Services expose an API and collaborating services use the API. Consider using
+technology agnostic APIs to prevent constraining technology choices.
+
+**** Key Benefits
+- Technology Heterogeneity :: Each service can choose their technology that is
+     right for the task
+- Resilence :: Multiple services act like bulkheads
+- Scaling :: Scale individual services instead of an entire monolith
+- Ease of Deployment :: Small changes can be deployed quickly
+- Organizational Alignment :: Code and teams are aligned
+- Composability :: Functionality of services can be consumed in different ways
+- Optimizing for replacability :: Small services are easier to replace/rewrite
+
+*** Chapter 2 - The Evolutionary Architect   
+The role of the software architect should be more like a city planner. The
+architect needs to think about how the systems will evolve. Like city planners,
+architects should zone out areas for systems. The architect's main concerns
+should be the communication between systems and less worried about what happens
+within a single system. With a /zone/ the team should be able to choose whatever
+technology makes sense.
+
+**** The Required Standard
+Need to balance how much variability is allowed in the system. Defining what is
+consider a well-behaved service should be a constant throughout all the
+services. 
+
+***** Monitoring
+There needs to be a system-wide view of health. Each service should use a
+standardize method to emits health and monitoring information along with
+metrics.
+
+***** Interfaces
+Use a small number of integration and interface technologies and standards. This
+goes beyond the protocol, but should include how versioning is handled, what
+stylistic standards to adhere to. 
+
+***** Architectural Safety
+Services need to ensure that they shield themselves accordingly from unhealthy
+downstream calls. There needs to be mandates such as using circuit breakers.
+Systems need to adhere to the error and failure standards, otherwise safety
+measures are not effective.
+
+**** Governance through code
+Make it easy for developers to do the right thing and follow the standards. Use
+exemplars and service templates.
+
+*** Chapter 3 - How to Model Services
+/Loose coupling/ and /High Cohesion/ are two key concepts to good microservices.
+When services are /loosely coupled/, _a change in one service should not require
+a change to another_.
+
+
+** Review
+
+** Next Steps

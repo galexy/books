@@ -1,0 +1,30 @@
+#+TODO: WISHLIST(w) BACKLOG(b!) READING(r!) | FINISHED(f!)
+
+* Reading List
+** READING [[file:building-microservices.org][Building Microservices]]
+:LOGBOOK:
+- State "READING"    from              [2017-11-24 Fri 20:41]
+:END:
+** READING [[file:leonardo-da-vinci.org][Leonardo Da Vinci]]
+:LOGBOOK:
+- State "READING"    from              [2017-11-18 Sat 13:09]
+:END:
+** BACKLOG [[file:akka-in-action.org][Akka In Action]]
+:LOGBOOK:
+- State "BACKLOG"    from              [2017-11-25 Sat 13:12]
+:END:
+** READING [[file:reactive-web-applications.org][Reactive Web Applications]]
+:LOGBOOK:
+- State "READING"    from "READING"    [2017-11-25 Sat 13:12]
+:END:
+** [[file:reactive-design-patterns.org::#flow-control-patterns][Reactive Design Patterns]]
+** [[file:functional-and-reactive-domain-modeling.org][Functional and Reactive Domain Modeling]]
+** [[file:spring-microservices-in-action.org::#chapter-5][Spring Microservices in Action]]
+** [[file:reactive-messaging-patterns-with-the-actor-model.org][Reactive Messaging Patterns with the Actor Model]]
+** [[exploring-cqrs-and-event-sourcing.org][Exploring CQRS and Event Sourcing]]
+** [[file:domain-driven-design.org][Domain Driven Design]]
+** [[file:implementing-domain-driven-design.org][Implementing Domain Driven Design]]
+** [[file:domain-driven-design-distilled.org][Domain Driven Design Distilled]]
+** [[file:behave.org][Behave]]
+** [[file:building-evolutionary-architectures.org][Building Evolutionary Architectures]]
+** [[file:type-driven-development-with-idris.org][Type-Driven Development with Idris]]

@@ -1,0 +1,21 @@
+* Pattern Recognition and Machine Learning
+:PROPERTIES:
+:Title: Pattern Recognition and Machine Learning
+:Edition: 1st
+:Author: Christopher M. Bishop
+:ISBN-13: 978-0-387-31073-2
+:END:
+
+** Notes
+*** Chapter 1
+**** 1.6 Information Theory
+***** Notes
+- information is how much surprise you have in seeing data
+- entropy is a measure for how much you can compress information?
+- what is the relationship between huffman codes and entropy?
+***** Open Questions
+- how can entropy of data help in classification problems or specifically in our fraud or anomaly models?
+
+** Review
+
+** Next Steps

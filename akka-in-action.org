@@ -1,0 +1,29 @@
+* Akka In Action
+:PROPERTIES:
+:Title:    Akka In Action
+:Author:   Raymond Roestenburg
+:Author+:  Rob Bakker
+:Author+:  Rob Williams
+:ISBN-13:  978-1-61729-101-2
+:END:
+
+* Notes
+
+** Chapter 1 - Introducing Akka
+:PROPERTIES:
+:CUSTOM_ID: chapter_1
+:END:
+
+** Chapter 2 - Up and Running
+
+** Chapter 3 - Test-driven Development with Actors
+
+** Chapter 4 - Fault Tolerance
+
+** Chapter 5 - Futures
+:PROPERTIES:
+:CUSTOM_ID: chapter_5
+:END:
+* Review
+
+* Next Steps

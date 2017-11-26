@@ -1,0 +1,245 @@
+* Reactive Design Patterns
+  :PROPERTIES:
+  :Title: Reactive Design Patterns
+  :Author: Roland Kuhn
+  :Edition: 1st
+  :ISBN-13:  978-1-61729-180-7
+  :END:
+
+** Notes
+*** Chapter 1 - Why Reactive
+- The main goal is build to systems that are responsive to users
+- Respond to user interactions in a timely fashion under all circumstances
+- Make the distributed and concurrent nature of the system explicit
+- Four tenets of the [[http://reactivemanifesto.org][Reactive Manifesto]]
+  1. It must react to its users (responsive)
+  2. It must react to failure and stay available (resilient)
+  3. It must react to variable load conditions (elastic)
+  4. It must react to inputs (message-driven)
+**** 1.1 - The anatomy of a Reactive application
+- Example application is based on Gmail
+- Functionality can be broken down via hierarchical decomposition into smaller and smaller pieces
+- Components need to be simple in terms of its responsibility, but its implementation or deployment
+  may be complex
+**** 1.2 - Coping with load
+- Storage needs for large systems require many distributed systems - no single system has enough space
+- Distribution allows for efficient access via sharding
+- Distribute interaction - rendering on the browser - shifting the workload very close to each user
+- Splitting the system into distributed parts, gain the ability to scale the service capacity
+**** 1.3 - Coping with failures
+- Need to keep things running even when things go wrong
+- The only solution is to replicate systems - data or functionality
+- Replication is more difficult then sharding because same data needs to be in multiple places
+- Choices of replication techniques
+  - /Active-passive replication/ - replicas agree on which one accepts updates
+  - /Consensus-based multiple-master replication/ - each update is agreed on by quorum
+  - /Optimistic replication with conflict detection and resolution/
+  - /Conflict-free replication data types/ - merge strategies that are conflict free
+**** 1.4 - Making the system responsive
+- In light of need for distribution - application must be responsive to user
+- Poor network connectivity makes application unresponsive
+- In the /Circuit Breaker pattern/, the service performance is monitored and when quality falls
+  below a threshold, the system switches to a mode where the service is not used
+- Responsiveness can degrade when services get momentarily overloaded. Response latency will be higher
+  than normal. Flow control can be used to combat this issue
+- It is important to create simple points of failure - the front-end for example should not
+  know about every back-end service. Instead, there should a web server servicing the front-end
+  that acts as a circuit breaker. If a particular non-essential back-end service is not available, 
+  the front-end can respond with a temporary failure code.
+**** 1.5 - Avoiding the ball of mud
+- On the back-end, there needs to be checks and balances to prevent services devolving into
+  a large set of service, all talking to each other.
+- The solution is to focus on the communication paths and to specifically design them - /message flow/
+**** 1.6 - Integrating nonreactive components
+- It is usually necessary to integrate with existing systems that are not reactive
+- Thees issues are dealt with using the /resource-management patterns/
+
+*** Chapter 2 - A walk-through of the Reactive Manifesto
+**** 2.1 - Reacting to users
+- This section is a bit odd - it's titled reacting to users, but is focused on
+  juxtaposing a ~traditional~ system with a reactive one without describing what
+  a reactive alternative would look like.
+- There is a focus on how the traditional approach has more modes of failure
+  because of the illusion of a single-threaded environment
+***** 2.1.1 - Understanding the traditional approach
+- If there is a cache miss, the call needs to be made to storage, which hangs the thread
+- When tuning performance, one of the key parameters is the ratio of request
+  threads to the size of the connection-pool
+***** 2.1.2 - Analyzing latency with a shared resource
+- Little's law - L = $\lambda$ x W If the system load is $\lambda$ (rate of
+  arrival) with a service time of W, then there will be over the long-term an
+  average number of L requests being serviced
+- This does not take into account spikes in requests
+- Traditional systems would have a request thread waiting in a queue for
+  resources, leading to back pressure up the request chain
+- If the database server stopped responding, even just 500 requests per second
+  would overwhelm an otherwise sufficient thread pool
+***** 2.1.3 - Limiting maximum latency with a queue
+- By putting a queue of a certain length, you can handle traffic and limit the
+  upperbound of the latency of the service
+**** 2.2 Exploiting parallelism
+The sequential model of computing that is ubiquitous in all programming
+languages requires the waiting of results to computed while other resources
+remain idle
+***** 2.2.1 Reducing latency via parallelization
+- If, for the completion of a request, several other services must be involved,
+  then the overall result will be obtained more quickly if the other services
+  can perform their functions in parallel. This require not dependency between
+  the results of each individual service.
+- Parallel execution of services requires that calls do not return the response
+  directly that initiated the request - otherwise the caller would be unable to
+  do anything else.
+- The solution is to return a /Future/ - a place holder for a value that will
+  eventually become available
+***** 2.2.2 Improving parallelism with composable Futures
+- The developer should describe how the values (from the Futures) should be
+  composed to form the final result
+- The system needs to be /task-oriented/ which is more expressive than the
+  callback
+
+#+BEGIN_SRC scala
+val fa: Future[ReplyA] = taskA()
+val fb: Future[ReplyB] = taskB()
+val fc: Future[ReplyC] = taskC()
+val fr: Future[Result] = for (a <- fa; b <- fb; c <- fc)
+                         yield aggregate(a, b, c)
+#+END_SRC
+
+- The requesting thread does not need to wait for the responses
+- It is trivial to add task timeouts
+***** 2.2.3 - Paying for the serial illusion
+- Synchronous, blocking APIs that hide underlying message-driven structure
+  wastes threads, which are expensive to schedule and therefore CPU and memory
+  resources
+**** 2.3 - The limits of parallel execution
+- Synchronization reduces parallelism - Amdahl's Law and Universal Scalability
+  Law
+**** 2.4 - Reacting to failure
+- The Reactive Manifesto chooses the term /Resilience/ instead of /Reliability/
+- Fault Tolerance instead of Fault Avoidance
+- A resilient system not only withstands a failure but also recovers its
+  original feature set
+- There is only one generic way to protect your system from failing as a whole
+  when a part fails: /distribute/ and /compartmentalize/.
+- A failed component should /delegate/ handling a failure and not be responsible
+  for its own recovery
+***** 2.4.1 - Compartmentalization and bulkheading
+- There is an interesting comment, on page 28, that I don't understand
+#+BEGIN_QUOTE
+One example from distributed computing design is managing fault tolerance at the
+level of entire application servers, where one failure can lead to the failure
+of other servers by overloading or stalling them
+#+END_QUOTE
+***** 2.4.2 - Using circuit breakers
+- monitor response time of service and if it goes above a threshold, switch to
+  another mode. Open the circuit break to half-open mode after the service has
+  had some time to recuperate.
+***** 2.4.3 - Supervision
+- Services handle failures it understands (validation of input), but it should
+  handle over responsibility for handling failures to a /supervisor/. This
+  allows the separation of business logic from specialized fault handling. For
+  example, how should a system handle retrying of reconnecting to a database?
+- Erlang/OTP using the Actor model was the first to support this
+**** 2.5 Losing strong consistency
+- [[http://dl.acm.org/citation.cfm?id=564601][Eric Brewer's CAP theorem]] states that any networked shared-data system can
+  have at most of three desirable properties
+  - Consistency (C) equivalent to having a single up-to-date copy of the data
+  - High availability (A) of that data (for updates)
+  - Tolerance to network partitions (P)
+***** 2.5.1 - ACID 2.0
+- Distributed systems are based on a different design, one of which is called
+  BASE = Basically Available Soft state Eventually consistent. During the update
+  of data between replicas, it is possible for external observers to see
+  inconsistent data.
+- The qualification "eventually" means that the window during which
+  inconsistency can be observed is bounded; when the system does not receive
+  modifications any longer and enters a quiescent state, it will eventually
+  become fully consistent.
+- *What does it mean that the system doesn't receive any changes anymore? What
+  are the scope of the changes?*
+- ACID 2.0
+  - Associative - batched operations
+  - Commutative - in any order
+  - Idempotent  - applying it multiple times is not harmful
+  - Distributed
+  - The end result does not depend on which replica accepts the change and in
+    what order the updates are disseminated across the network
+****** TODO Find research by Peter Bailis and Martin Kleppmann regarding consistency and availability
+***** 2.5.2 - Accepting updates
+- CRDT - conflict-free replicated data-types allow for modifications during
+  network partitioning, which allow merging cleanly when the partitioning ends
+
+*** Chapter 3 - Tools of the trade
+:PROPERTIES:
+:CUSTOM_ID: tools-of-the-trade
+:END:
+
+*** Chapter 4 - Message passing
+:PROPERTIES:
+:CUSTOM_ID: message-passing
+:END:
+
+*** Chapter 5 - Location transparency
+:PROPERTIES:
+:CUSTOM_ID: location-transparency
+:END:
+
+*** Chapter 6 - Divide and conquer
+:PROPERTIES:
+:CUSTOM_ID: divide-and-conquer
+:END:
+
+*** Chapter 7 - Principled failure handling
+:PROPERTIES:
+:CUSTOM_ID: principled-failure-handling
+:END:
+
+*** Chapter 8 - Delimited consistency
+:PROPERTIES:
+:CUSTOM_ID: delimited-consistency
+:END:
+
+*** Chapter 9 - Nondeterminism by need
+:PROPERTIES:
+:CUSTOM_ID: nondeterminism-by-need
+:END:
+
+*** Chapter 10 - Message flow
+:PROPERTIES:
+:CUSTOM_ID: message-flow
+:END:
+
+*** Chapter 11 - Testing reactive applications
+:PROPERTIES:
+:CUSTOM_ID: testing-reactive-applications
+:END:
+
+*** Chapter 12 - Fault tolerance and recovery patterns
+:PROPERTIES:
+:CUSTOM_ID: fault-tolerance-and-recovery-patterns
+:END:
+
+*** Chapter 13 - Replication patterns
+:PROPERTIES:
+:CUSTOM_ID: replication-patterns
+:END:
+
+*** Chapter 14 - Resource-management patterns
+:PROPERTIES:
+:CUSTOM_ID: resource-management-patterns
+:END:
+
+*** Chapter 15 - Message flow patterns
+:PROPERTIES:
+:CUSTOM_ID: message-flow-patterns
+:END:
+
+*** Chapter 16 - Flow control patterns
+:PROPERTIES:
+:CUSTOM_ID: flow-control-patterns
+:END:
+
+*** Chapter 17 - State management and persistence patterns
+:PROPERTIES:
+:CUSTOM_ID: state-management-and-persistence-patterns
+:END:

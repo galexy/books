@@ -1,0 +1,337 @@
+* Reactive Web Applications
+:PROPERTIES:
+:Title:    Reactive Web Applications
+:Author:   Manuel Bernhardt
+:Edition:  1st
+:CopyrightYear: 2016
+:ISBN-13:  978-1-63343-009-9
+:END:
+
+** Notes
+
+*** Chapter 1 - Did you say reactive?
+David Harel and Amir Pnueli published a paper, "On the Development of Reactive
+Systems", that distinguishes between /transformative/ and /reactive/ system.
+
+- Transformative :: Accepts input, transforms it and produces output
+- Reactive :: Continuously responds to stimuli from the external environment 
+
+Gérard Berry introduce the distinction between /interactive/ and /reactive/
+systems. /Interactive/ systems set the speed of the interaction, whereas
+/reactive/ systems interact with the environment at the speed dictated by the
+environment.
+
+Reactive systems therefore are:
++ Are available to continuously interact with their environment
++ Run at a speed that is dictated by the environment, not the program itself
++ Work in response to external demand
+
+**** The Reactive Manifesto
+The /Reactive Manifesto/ describes how reactive applications should behave. The
+four traits of a reactive application are:
+- Responsive :: React to users
+- Scalable :: React to load
+- Resilent :: React to failure
+- Event-drivent :: React to events
+
+A /responsive/ application will respond in a near real-time manner and respond
+within a very short time. Applications need to be /scalable/ in order to adjust
+to the load its facing. Applications and the hardware they run on are always
+prone to failure and reactive applications need to be /resilient to failure/.
+/Event-driven/ applications can help achieve these traits.
+
+**** Rethinking computational resource utilization
+- Discussion of threaded vs evented web servers
+- Makes the mistake of saying that evented servers work via message passing
+- The description of evented servers doesn't seem correct - talks about slicing
+  and event handlers
+- Memory requirements of a threaded server are higher because of stack space
+- Threads are leaky abstraction because of shared mutable state
+- Locking is used to handled shared state, but cause contention
+- Asynchronous programming appears difficult with callbacks, but are easier with
+  futures and actors
+- Deploying horizontal applications means deploying the same code on multiple
+  nodes and each is stateless - and so server-side sessions can't be used
+
+**** Failure-handling as first-class concern
+Instead of avoid failure, reactive applications embrace failure and use
+/supervision/ to be resilient. Applications fail because humans make mistakes.
+CAP theorem states that we can trade of network for consistency and availability. 
+
+Not every kind of failure needs to render an application unavailable. 
+- Clients can be resilient to lost of network.
+- Applications can be broken into multiple services and provide a type of
+  /bulkhead/. If a single service goes down, the other services are still up.
+- /Supervision/ separates the concern of executing a task from deciding how to
+  handle failures.
+
+*** Chapter 2 - Play Framework
+Uses the play framework version 2.4. The APIs are outdated and still use
+Enumerator, Enumeratee and Iteratees intead of Akka Streams.
+
+*** Chapter 3 - Functional programming primer
+Mentions the following:
+- Immutability vs state in OO languages, but doesn't actually make a good argument.
+- Mentions expression-oriented programming, but not side-effect free, pure
+  functions, referential transparency or the substitution model. 
+- Provides some weak coverage of high-order functions (doesn't use that term)
+- Mentions function composition and there refers to /higher-order functions/.
+- Basic coverage of functional idioms (map, flatmap, for-compressions) on
+  collections to juxtapose mutating loops
+- Shows how map and flatMap are also used on Option type
+- No mention of fold or reduce
+
+*** Chapter 4 - Quick introduction to Play
+Covers the following:
+- Creating a minimal Play application
+- Request handling lifecylce
+- Error handling
+- Request routing and action generation method
+- Dependency injection to retrieve a service within a controller
+
+Under the hook, ~Action~ is an ~EssentialAction~ (version 2.4 of play framework)
+
+#+BEGIN_SRC scala
+trait Action[A] extends EssentialAction {
+  def parser: BodyParser[A]
+  def apply(request: Request[A]): Future[Result]
+}
+
+trait Request[+A] extends RequestHeader {
+  def body: A
+}
+
+trait EssentialAction extends (RequestHeader => Iteratee[Array[Byte], Result]) with Handler
+#+END_SRC
+
+WebSockets maintain two-way communication between the server and client and
+helps in building interactive web applications. Play has support for WebSockets,
+thru a specific type of ~Handler~ and uses actors and iteratees. 
+
+Play has support for custom error handling and can transform requests and
+responses thru a series of /filters/. Filters can do things like compress the
+response, add security, etc. 
+
+*** Chapter 5 - Futures
+Futures are a monadic data structure, so they can be easily composed. 
+#+BEGIN_QUOTE
+The coverage of Futures is better in [[file:akka-in-action.org::#chapter_5][Akka in Action - Chapter 5 - Futures]].
+#+END_QUOTE
+
+Futures can be thought of as a container that eventually holds the result of a
+computation. As soon as a ~Future~ is declare, it starts running. A callback is
+registered using the ~onComplete~ method and _does not block_.
+
+#+BEGIN_SRC scala
+import scala.util.{Success, Failure}
+
+response onComplete {
+  case Success(response) => println(s"Success: response.body")
+  case Failure(t) => t.printStackTrace()
+}
+#+END_SRC
+
+The result of a ~Future~ can also be mapped or ~recovered~ in the case of
+failure.
+
+#+BEGIN_SRC scala
+val response: Future[WSResponse] = WS.url("http://www.playframework.com").get()
+val siteAvailable: Future[Option[Boolean]] = response.map { r =>
+  Some(r.status == 200)
+} recover {
+  case ce: java.net.ConnectException => None
+}
+#+END_SRC
+
+Futures can be composed by using ~flatMap~ or ~for~ comprehensions.
+
+#+BEGIN_SRC scala
+val playSiteAvailable = siteAvailable("http://www.playframework.com")
+val playGithubAvailable = siteAvailable("https://github.com/playframework")
+val allSitesAvailable: Future[Boolean] = for {
+  siteAvailable <- playSiteAvailable
+  githubAvailable <- playGithubAvailable
+} yield (siteAvailable && githubAvailable)
+
+val overallAvailability: Future[Option[Boolean]] =
+  allSitesAvailable.map { a =>
+    Option(a)
+  } recover {
+    case ce: java.net.ConnectException => None
+  }
+#+END_SRC
+
+Futures can be used to move blocking I/O into other execution context. However,
+this is does not make the code asynchronous. It does not makes sense to create
+futures for CPU-bound operations. 
+
+The Play framework is built on an event-driven web-server architecture. That
+means good performance requires that routes are handled by asynchronous
+controller actions. Actions using ~Action.async~ take a function of type
+~Request => Future[Result]~. Asynchronous actions can also recover from failure
+and timeouts.
+
+#+BEGIN_SRC scala
+def authenticate(username: String, password: String) = Action.async {
+  implicit request =>
+    val authentication: Future[AuthenticationResult] = authenticationService.authenticate(username, password)
+ 
+      val timeoutFuture = Promise.timeout("Authentication service unresponsive", 2.seconds)
+
+      Future.firstCompletedOf(Seq(authentication, timeoutFuture))
+        .map {
+          case AuthenticationResult(success, _) if success =>
+            Ok("You can pass")
+          case AuthenticationResult(success, error) if !success =>
+            Unauthorized(s"You shall not pass: $error")
+          case timeoutReason: String =>
+            ServiceUnavailable(timeoutReason)
+        } 
+}
+#+END_SRC
+
+Futures should be composed in order to maximize the amount of parallel work that
+is done. This will reduce the latency of the overall process. 
+
+*** Chapter 6 - Actors
+#+BEGIN_QUOTE
+The coverage of Akka here is very light and doesn't give the uninitiated a sense
+of what can be done in Akka or how things work. I recommend reading [[file:akka-in-action.org][Akka in
+Action]] instead.
+#+END_QUOTE
+
+**** Actor Concepts
+- Actors can send and receive messages and messages are handled in order
+- You don't have direct access to the mailbox. Actors implement the ~receive~
+  method in order to process the messages.
+- Actors are part of an ~ActorSystem~ which manages resources
+- Actor needs an ~ExcecutionContext~ or dispatcher to process their messages
+- Actors aren't threads or hold onto threads, but they need threads to do their
+  work. This allows for good resource utilization
+- Actors are not accessed directly, but instead thru an /actor reference/. This
+  indirection hides actor lifecycle from clients an eliminates non-thread-safe
+  access to the actor's internals.
+- Actors are part of a hierarchy of actors, where each actor has a parent actor.
+  Parents act as supervisors and decide how to deal with the failure of a child
+  actor (resume, restart, stop)
+
+|---------+---------------------+-------------------+--------------------------------|
+| Phase   | Triggered           | Lifecycle methods | Description                    |
+|         | by                  | involved          |                                |
+|---------+---------------------+-------------------+--------------------------------|
+| Start   | Call to ~actorOf~   | ~preStart~        | The actor's path is reserved,  |
+|         |                     |                   | the actor instance is created  |
+|         |                     |                   | and the ~preStart~ hook is     |
+|         |                     |                   | called.                        |
+|---------+---------------------+-------------------+--------------------------------|
+| Resume  | A supervisor, if it |                   | If an actor crashes the        |
+|         | decides to do so    |                   | supervisor process kicks in    |
+|         |                     |                   | and the actor is suspended.    |
+|         |                     |                   | The supervisor may decide to   |
+|         |                     |                   | resume an actor's execution    |
+|---------+---------------------+-------------------+--------------------------------|
+| Restart | A supervisor, if it | ~preStart~ and    | Default behavior on failure.   |
+|         | decides to do so    | ~postRestart~     | Actor path remains the same    |
+|         |                     |                   | and a new instance is created. |
+|         |                     |                   | Messages in the inbox are      |
+|         |                     |                   | still there, but actor state   |
+|         |                     |                   | is flushed out.                |
+|---------+---------------------+-------------------+--------------------------------|
+| Stop    | Call to             | ~postStop~        | When an actor is stopped,      |
+|         | ~context.stop()~    |                   | actors who watching will       |
+|         | or receive a        |                   | receive a Terminated message   |
+|         | ~PosionPill~        |                   |                                |
+|         | message             |                   |                                |
+|---------+---------------------+-------------------+--------------------------------|
+
+- Unhandled messages can be intercepted by the ~unhandled~ method
+#+BEGIN_SRC scala
+class SomeActor extends Actor with ActorLogging {
+  override def unhandled(message: Any): Unit = {
+    log.warn("Unhandled message {} message from {}", message, sender())
+    super.unhandled(message)
+  }
+}
+#+END_SRC
+
+- There are several methods for sending messages to actors
+  - ~tell~ :: (aka ~!~) send messages in fire-and-forget mode
+  - ~ask~ :: (aka ~?~) returns a Future of the response message
+  - ~forward~ :: like ~tell~, but will maintain original sender for reply
+  - ~pipeTo~ :: send the result of a ~Future~ to an actor upon completion
+
+**** Let it crash
+The idea of letting a system crash and recover is one of the cornerstones of
+Erlang. The idea is to create layers of actors, reach a level of granularity
+wherein each leaf actor has the best possible focus. Instead of focusing on
+/avoiding/ failure, actor systems focus on /recovering/ from failure in the most
+effective way. This means _not trying to catch exceptions_ and letting the
+supervisor of a crashed actor to decide what to do. 
+
+#+BEGIN_QUOTE
+Isn't having the failure handling code further from the source of the failure
+make it harder to understand the recovery code. Especially when you aren't sure
+who your parent actor (supervisor) is. This seems to also introduce tight
+coupling of a child and parent actor. The parent needs to be aware of the types
+of failures that a child can encounter.
+#+END_QUOTE
+
+**** Reacting to load
+***** Control-flow messages
+This section refers to the user of ACK messages and dealing with unacknowledged
+requests. Messages are resent if they have not been acknowledged within a given
+window. On the receiving actor, duplicate messages need to be idempotent.
+Finally, if the number of unacknowledged messages increases, the sending actor
+needs to slow down or stop. The receiving actor uses back pressure to signal to
+the producer to slow down.
+
+#+BEGIN_QUOTE
+All of this discussion is similar to TCP flow control, but in the examples,
+ad-hoc solutions are presented. Instead, it might make more sense to abstract
+the flow control mechanisms and let applications choose what flow control
+policies they want to use.
+
+See [[file:tcpip-illustrated-volume-1-2nd-edition.org::#tcp-data-flow-and-window-management][TCP/IP Illustrated Volume 1 2nd Edition - TCP Data Flow and Window Management]]
+#+END_QUOTE
+
+****** Related Reading
+- [[file:reactive-design-patterns.org::#flow-control-patterns][Reactive Design Patterns - Chapter 16 - Flow control patterns]]
+
+***** Prioritizing messages
+This section talks about the user of /Control Aware Mailboxes/ to address rate
+limiting in downstream services. Actors that use this type of mailbox will send
+messages of type ~ControlMessage~ at a higher priority. The example, however,
+just makes the service unavailable during the period that rate limiting is
+reached and doesn't do any sort of queuing of requests.
+
+***** Circuit Breakers
+Some services that don't have rate limiting start to slow down as load
+increases. A circuit breaker in electronics protects circuits from overloading
+or shorting out. A software circuit breaker functions are follows:
+
+  1. When everything is fine, it's in a /closed/ state, letting data flow
+  2. When an overload or a short circuit is detected, the breaker /trips/ and is
+     in an open state, not letting anything pass.
+  3. After a bit, the break will put itself in a /half-open/ state, probing to
+     see if things are back to normal. if the data flows, the breaker puts
+     itself back into the open state. 
+
+Akka provides an implementation in [[https://doc.akka.io/docs/akka/current/common/circuitbreaker.html][~akka.patterns.CircuitBreaker~]]. This circuit
+breaker works by detecting /timeouts/. 
+
+****** Related Reading
+- [[file:reactive-design-patterns.org::#fault-tolerance-and-recovery-patterns][Reactive Design Patterns - Chapter 12 - Fault tolerance and recovery patterns]]
+- [[file:spring-microservices-in-action.org::#chapter-5][Spring Microservices in Action - Chapter 5 - client resiliency patterns]]
+
+*** Chapter 7 - Dealing with state
+:PROPERTIES:
+:CUSTOM_ID: dealing-with-state
+:END:
+
+**** Database and Client-side state
+
+**** Command and Query Responsibility Segregation and Event Sourcing
+
+** Review
+
+** Next Steps

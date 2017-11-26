@@ -1,0 +1,6 @@
+* Notes
+** Chapter 3 - Linear Methods for Regression
+*** 3.1 Introduction
+**** 
+
+* Review

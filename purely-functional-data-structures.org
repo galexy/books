@@ -1,0 +1,15 @@
+
+* Purely Functional Data Structures
+  :PROPERTIES:
+  :BOOK_TITLE: Purely Functional Data Structures
+  :BOOK_AUTHOR: Chris Okasaki
+  :ASIN:     0521663504
+  :ISBN-13:  978-0521663502
+  :END:
+
+** Reading Notes
+
+
+
+** Review
+

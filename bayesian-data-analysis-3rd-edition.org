@@ -1,0 +1,59 @@
+* Bayesian Data Analysis
+** Authors
+- Andrew Gelman
+- John B. Carlin
+- Hal S. Stern
+- David B. Dunson
+- Aki Vehtari
+- Donald B. Rubin
+** Review
+** Notes
+*** Chapter 1 - Probability and Inference
+**** 1.1 The three steps of Bayesian Data Analysis
+Bayesian data analysis is ideally broken up into three stages:
+1. Setting up a fully probability model
+2. Conditioning on observed data
+3. Evaluating the fit of the model
+
+The description of these three steps is very abstract. It is merely stated as "a joint probability description for all
+observable and unobservable quantities in a problem. The model should be consistent with knowledge about the underlying
+scientitic problem and the data collection process." There are two very subtle points here. The first is that the
+modeling and inference targets are on two types of quantities, the observed and the unobserved. What is interesting
+is that much of classical statistical inference that is taught is around the unobserved quantities, the parameters
+or sufficient statistics of a probability distribution assumed to describe a population. Which feeds into the second point,
+that the modeling that links these quantities is explicit when doing a Bayesian analysis. Whereas in traditional uses
+of statistical in scientific investigations, the models have been turned into tools who's models are no explicit. Assumptions
+of these productized statistical tools are hidden, and one has to be in the know. Whereas in a Bayesian analysis, the
+investigator has to *state* the model in an explicit manner using the language of probability.
+
+This is made clear when considering linear regression. There is no question that there is a statistical inference 
+procedure behind the estimation of the coefficients of the model. The MLE procedure yields a least squares solution.
+It is this operational procedure that is taught in introductory courses. And, for many people, that is the limit 
+of there understanding. Many users of the OLS cannot explain why constant variance is important to check for in
+an linear model. But, when modeled explicity, it is very clear that the variance parameter does not depend on the data.
+User of statistics usually don't come to the conclusion that parameter estimation techniques uses for describing
+a probability distribution from a sample of data is really the same thing as estimating coefficents of a linear model.
+
+Finally, the method of explicit modeling is a common conceptual framework from which to do statistical analysis of
+all sorts. Unlike the bag of tools approach, explicit modeling gives you one tool set for performing any analysis. 
+Traditional tool usage requires that 1) a mapping of the problem to the correct tool 2) a different software library
+for each problem and 3) a vigilance in making sure to recall all the implicit assumptions of the actual statistical  
+model driven each method. A great example of this is the case of ANOVA and ANOCVA. Historically, these were explicit
+statitical procedures requiring the user to compute a specific statistic (Chi-Square), use statistic for as a 
+decision criteria. The user must go through a decision tree related to the question and data at hand to determine 
+if such a procedure made sense. There is no intuition that is built up for why this procedure works. Later, researchers
+realized that ANOVA and ANOCVA were really special cases of linear regression. 
+
+So it turns out, this first step of setting up a probability model is a unifying framework for doing statistical analysis.
+I think this point is much better made in Rethinking Statistics.
+
+The second point is also very important, because it is what really makes an analysis Bayesian. It is the convolution
+of prior probabilities with observed data that differentiates a Bayesian analysis from traditional statistics. What
+is really interesting that is that this approach has many links to main problem of machine learning - over-fitting.
+The compromise of prior belief with observed data is one way to make the trade offs between bias and variance.
+
+**** 1.3 Bayesian inference
+One additional point of difference is that the inference procedures of a Bayesian analysis match our intuition. Compared
+to a traditional confidence interval, the posterior distribution is an explicit measure of probable values. These
+probability statements are conditional on the observed value and is written as $p(y|\theta)$.
+ 
