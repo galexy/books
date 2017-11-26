@@ -116,7 +116,7 @@ response, add security, etc.
 
 *** Chapter 5 - Futures
 Futures are a monadic data structure, so they can be easily composed. 
-#+BEGIN_NOTE
+#+BEGIN_SIDEBAR
 The coverage of Futures is better in [[file:akka-in-action.org::#chapter_5][Akka in Action - Chapter 5 - Futures]].
 #+END_NOTE
 
@@ -196,7 +196,7 @@ Futures should be composed in order to maximize the amount of parallel work that
 is done. This will reduce the latency of the overall process. 
 
 *** Chapter 6 - Actors
-#+BEGIN_NOTE
+#+BEGIN_SIDEBAR
 The coverage of Akka here is very light and doesn't give the uninitiated a sense
 of what can be done in Akka or how things work. I recommend reading [[file:akka-in-action.org][Akka in
 Action]] instead.
@@ -270,7 +270,7 @@ wherein each leaf actor has the best possible focus. Instead of focusing on
 effective way. This means _not trying to catch exceptions_ and letting the
 supervisor of a crashed actor to decide what to do. 
 
-#+BEGIN_NOTE
+#+BEGIN_SIDEBAR
 Isn't having the failure handling code further from the source of the failure
 make it harder to understand the recovery code. Especially when you aren't sure
 who your parent actor (supervisor) is. This seems to also introduce tight
@@ -287,14 +287,14 @@ Finally, if the number of unacknowledged messages increases, the sending actor
 needs to slow down or stop. The receiving actor uses back pressure to signal to
 the producer to slow down.
 
-#+BEGIN_NOTE
+#+BEGIN_SIDEBAR
 All of this discussion is similar to TCP flow control, but in the examples,
 ad-hoc solutions are presented. Instead, it might make more sense to abstract
 the flow control mechanisms and let applications choose what flow control
 policies they want to use.
 
 See [[file:tcpip-illustrated-volume-1-2nd-edition.org::#tcp-data-flow-and-window-management][TCP/IP Illustrated Volume 1 2nd Edition - TCP Data Flow and Window Management]]
-#+END_NOTE
+#+END_SIDEBAR
 
 ****** Related Reading
 - [[file:reactive-design-patterns.org::#flow-control-patterns][Reactive Design Patterns - Chapter 16 - Flow control patterns]]
