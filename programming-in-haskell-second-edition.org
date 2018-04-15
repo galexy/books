@@ -4,7 +4,7 @@
 :Author:   Grahamm Hutton
 :END:
 
-** Notes and Exercises
+** Notes
 
 *** Introduction
 
@@ -288,3 +288,91 @@ There are five steps are recommended.
 3. define the simple cases
 4. define the other cases
 5. generalize and simplify
+
+*** Chapter 7 - Higher-order functions
+
+In Haskell is it permissible to take functions as arguments. Such functions are
+called /higher-order/ functions. Higher-order functions increases the expressive
+power of Haskell by allowing common programming patterns to be captured as
+functions and can be used to define domain-specific languages within the
+language itself.
+
+The standard prelude defines several functions for processing lists. The
+function [[http://hackage.haskell.org/package/base-4.11.0.0/docs/Prelude.html#v:map][~map~]] applies a function to all elements of a list. The function
+[[http://hackage.haskell.org/package/base-4.11.0.0/docs/Prelude.html#v:filter][~filter~]] selects all elements of a list that satisfy a predicate.
+
+Many functions that take a list as an argument can be defined using the
+following pattern, where ~v~ is a value that maps to an empty list and any
+non-empty list the operator ~#~ is applied to the head of the list and the
+result of the recursion.
+
+#+BEGIN_SRC haskell
+f []     = v
+f (x:xs) = x # f xs
+#+END_SRC
+
+The higher-order function [[http://hackage.haskell.org/package/base-4.11.0.0/docs/Prelude.html#v:foldr][~foldr~]] encapsulates this pattern of recursion.
+
+#+BEGIN_SRC haskell
+sum :: Num a => [a] -> a
+sum = foldr (+) 0
+
+product :: Num a => [a] -> a
+product = foldr (*) 1
+
+or :: [Bool] -> Bool
+or = foldr (||) False
+
+and :: [Bool] -> Bool
+and = foldr (&&) True
+#+END_SRC 
+
+#+BEGIN_QUOTE
+It just so happens that all the examples are [[https://en.wikipedia.org/wiki/Monoid][*monoids*]].
+#+END_QUOTE
+
+The ~foldr~ function can be defined recursively itself.
+
+#+BEGIN_SRC haskell
+foldr :: (a -> b -> b) -> b -> [a] -> b
+foldr f v []     = v
+foldr f v (x:xs) = f x (foldr f v xs)
+#+END_SRC
+
+The function ~foldr~ means /fold right/ and reflects the use of an operator that
+associates to the right. It is also linked to the ~cons~ operator in that one
+can think of ~foldr~ as replacing all the ~cons~ operators in the list with
+another operator and the empty list with the default value.
+
+The function [[http://hackage.haskell.org/package/base-4.11.0.0/docs/Prelude.html#v:foldl][~foldl~]] is like ~foldr~ but is used for operators that associate to
+the left. For operators that are /associative/ it does not matter if you use
+~foldr~ or ~foldl~. 
+
+#+BEGIN_QUOTE
+Note: the order of the arguments in the operator function are reversed in
+~foldl~. This is because you can think of foldl as an accumulation process as it
+scans the list from beginning to end (left to right). The value ~v~ is the
+/accumulator/.
+#+END_QUOTE
+
+~Compose~ is another higher-order function that takes two functions and returns
+the composition of the two functions. The compose function is represented as the
+infix operator ~(.)~. The following expressions are the same.
+
+#+BEGIN_SRC haskell
+sumsqreven ns = sum (map (^2) (filter even ns))
+
+sumsqreven = sum . map (^2) . filter even
+#+END_SRC
+
+The second example exploits the fact that composition is associative. That is
+the following are the same: ~f . (g . h) = (f . g) . h~.
+
+#+BEGIN_QUOTE
+Note: the last example also used pointfree style, where the arguments of the
+function are not specified. The argument ~ns~ is missing the function
+definition.
+#+END_QUOTE
+
+The remainder of the chapter goes through two programming examples using
+higher-order functions.
