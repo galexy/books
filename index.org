@@ -12,19 +12,25 @@
 ** BACKLOG [[file:akka-in-action.org][Akka In Action]]
 :LOGBOOK:
 - State "BACKLOG"    from              [2017-11-25 Sat 13:12]
-:END:
-** READING [[file:reactive-web-applications.org][Reactive Web Applications]]
+** READING [[file:programming-in-haskell-second-edition.org][Programming in Haskell - Second Edition]]
 :LOGBOOK:
+- State "READING"    from "BACKLOG"    [2018-01-07 Sun 17:58]
+:END:
+** FINISHED [[file:reactive-web-applications.org][Reactive Web Applications]]
+CLOSED: [2017-12-02 Sat 11:32]
+:LOGBOOK:
+- State "FINISHED"   from "READING"    [2017-12-02 Sat 11:32]
 - State "READING"    from "READING"    [2017-11-25 Sat 13:12]
 :END:
 ** [[file:reactive-design-patterns.org::#flow-control-patterns][Reactive Design Patterns]]
 ** [[file:functional-and-reactive-domain-modeling.org][Functional and Reactive Domain Modeling]]
 ** [[file:spring-microservices-in-action.org::#chapter-5][Spring Microservices in Action]]
 ** [[file:reactive-messaging-patterns-with-the-actor-model.org][Reactive Messaging Patterns with the Actor Model]]
-** [[exploring-cqrs-and-event-sourcing.org][Exploring CQRS and Event Sourcing]]
+** [[file:exploring-cqrs-and-event-sourcing.org][Exploring CQRS and Event Sourcing]]
 ** [[file:domain-driven-design.org][Domain Driven Design]]
 ** [[file:implementing-domain-driven-design.org][Implementing Domain Driven Design]]
 ** [[file:domain-driven-design-distilled.org][Domain Driven Design Distilled]]
 ** [[file:behave.org][Behave]]
 ** [[file:building-evolutionary-architectures.org][Building Evolutionary Architectures]]
 ** [[file:type-driven-development-with-idris.org][Type-Driven Development with Idris]]
+** [[file:mastering-type-script-second-edition.org][Master TypeScript - Second Edition]]

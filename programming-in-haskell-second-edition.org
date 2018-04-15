@@ -1,0 +1,219 @@
+* Programming in Haskell - Second 
+:PROPERTIES:
+:Title:    Programming in Haskell
+:Author:   Grahamm Hutton
+:END:
+
+** Notes and Exercises
+
+*** Introduction
+
+**** Functions
+
+A /function/ is a mapping that take one or more arguments and produces a single
+result and is defined using a an equation that gives a name for the function, a
+name for of each of its arguments and a body that species how the result can be
+calculated in terms of the arguments.
+
+**** Functional Programming
+
+Functional programming is the /style/ of program in which the basic method of
+computation is the application of functions to arguments. This is different from
+other languages where the basic method of computation is /changing stored
+values/. Languages in which the basic method of computation is changing stored
+values are called /imperative/ languages. Many imperative languages support
+application of functions to arguments, but do not /encourage/ it.
+
+**** Features of Haskell
+
+- Concise programs
+- Powerful type system
+- List Comprehension
+- Recursive functions
+- Higher-order functions
+- Effectful functionds
+- Generic functions
+- Lazy Evaluation
+- Equational Reasoning
+
+**** A taste of Haskell
+
+#+BEGIN_SRC haskell
+sum []     = 0
+sum (n:ns) = n + sum ns
+
+sum [1, 2, 3]
+#+END_SRC
+
+This is the first example that shows off haskell's recursive function definition
+and type inference.
+
+Even more interesting is the next example
+#+BEGIN_SRC haskell
+qsort []     = []
+qsort (x:xs) = qsort smaller ++ [x] ++ qsort larger
+               where
+                  smaller = [a | a <- xs, a <= x]
+                  larger  = [b | b <- xs, b > x]
+#+END_SRC
+
+This is an amazing example that demonstrates the expressive power of Haskell. 
+
+*** Chapter 2 - First Steps
+
+This chapter goes through some basics on getting started with the Glasgow
+Haskell Compiler. And, it gives a basic overview of the [[https://hackage.haskell.org/package/base-4.11.0.0/docs/Prelude.html][standard prelude]].
+Examples of function application (and the precedence of function application),
+the layout rule are introduced. Of note, function application doesn't use
+parenthesis add commas to group and separate arguments. Also, it has the highest
+precedence. Because of the layout rule, tabs are to be avoided.
+
+*** Chapter 3 - Types and Classes
+
+A *type* is a collection of related values. The basic types in Haskell include:
+
+- ~Bool~
+- ~Char~
+- ~String~
+- ~Int~
+- ~Integer~
+- ~Float~
+- ~Double~
+- List Types
+- Tuple Types
+- Function Types
+
+Functions are actually /curried/ by default. Functions are actually returning
+other functions. For example, the following types are really same in Haskell,
+but on the surface they seem to be saying different things.
+
+#+BEGIN_SRC haskell
+add :: Int -> Int -> Int
+add :: Int -> (Int -> Int)
+#+END_SRC
+
+**** Functions
+
+Functions that take multiple parameters are conceptually functions that take one
+parameter at a time and return a function that takes the rest of the parameters.
+Because this behavior is associative, it doesn't matter what the grouping of the
+parentheses are the last example is the canonical way to express the type of a
+function. Functions taking more than two arguments are treated the same way as
+returning functions themselves.
+
+Functions that that take their arguments on at a time are called /curried
+functions/. Curried functions can be used to create new useful functions by
+partially applying arguments to a function.
+
+Function application is therefore associates to the left. The following two
+calls to mult are the same.
+
+#+BEGIN_SRC haskell
+mult x y z
+((mult x) y) z
+#+END_SRC
+
+**** Polymorphic Types
+
+Functions and types can take type as parameters. The parameters are /type
+variables/ which *must* start with a lower case letter. A type that contains one
+or more type variables is called /polymorphic/. The ~length~ function is a
+polymorphic function that works on list of any type ~a~.
+
+#+BEGIN_SRC haskell
+length :: [a] -> Int
+#+END_SRC
+
+**** Overloaded Types
+
+Some types and functions operate on multiple types with certain constraints like
+~+~ are called /overloaded/. The types are defined with a constraint on the type
+variables. The constraint specify what /class/ the type variable must support.
+Types that have class constraints are called overloaded.
+
+#+BEGIN_SRC haskell
+abs :: Num a => a -> a
+#+END_SRC
+
+**** Basic classes
+A type is a collection of values. A /class/ is a collection of types that
+support certain overloaded operations called /methods/.
+
+#+BEGIN_QUOTE
+Note: classes in Haskell are not like classes in object-oriented program.
+Classes are defined separately from the types that are in the class and
+implementations of the /methods/ do not have to be defined with the types. This
+means that class hierarchies and type hierarchies evolve separately. This is a
+far more flexible mechanism for polymorphic behavior than that in OO languages.
+#+END_QUOTE
+
+*** Chapter 4 - Defining Functions
+
+**** Conditional Expressions
+
+#+BEGIN_SRC haskell
+abs n = if n >= 9 then n else -n
+#+END_SRC
+
+Unlike other languages, conditional expressions in Haskell must always have an
+~else~ branch.
+
+**** Guarded equations
+An alternative to conditional expressions is /guarded equations/ in which a
+sequence of logical expressions called /guards/.
+
+#+BEGIN_SRC haskell
+abs n | n >= 0    = n
+      | otherwise = n
+#+END_SRC
+
+The ~|~ is read as /such that/, and the guards ~otherwise~ is defined in the
+standard prelude as ~True~. Guarded equations are usually easier to read than
+nested conditional expressions.
+
+**** Pattern Matching
+Many functions can be defined using /pattern matching/ where a sequence of
+/patterns/ is used to choose between a sequence of result of the same type. The
+order of the patterns and their corresponding expressions matters.
+
+#+BEGIN_SRC haskell
+(&&) :: Bool -> Bool -> Bool
+True && True   = True
+True && False  = False
+False && True  = False
+False && False = False
+#+END_SRC
+
+This definition of ~&&~ can be simplified with /wildcards/ and variables.
+
+#+BEGIN_SRC haskell
+True  && b = b
+False && _ = False
+#+END_SRC
+
+A tuple of patterns is itself a pattern.
+
+#+BEGIN_SRC haskell
+fst :: (a,b) -> a
+fst (x,_) = x
+#+END_SRC
+
+The same is true for a list of patterns.
+
+#+BEGIN_SRC haskell
+test :: [Char] -> Bool
+test ['a',_,_] = True
+test _         = False
+
+test :: [Char] -> Bool
+test ('a':_) = True
+test _       = False
+#+END_SRC
+
+**** Lambda Expressions
+Functions can be created using /lambda expressions/. 
+
+*** Chapter 5 - List Comprehensions
+
+In mathematics, the /comprehension/ notation can be used to construct new sets
+from existing sets. An example is ${x^2 \mid x \in {1 \ldots 5}}$.

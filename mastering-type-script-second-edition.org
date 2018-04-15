@@ -1,0 +1,7 @@
+* Mastering TypeScript - Second Edition
+** Notes
+*** Chapter 1 - TypeScript - Tools and Framework Options
+
+*** 
+** Review
+** Next Steps

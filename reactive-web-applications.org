@@ -317,6 +317,62 @@ breaker works by detecting /timeouts/.
 **** Database and Client-side state
 
 **** Command and Query Responsibility Segregation and Event Sourcing
+CQRS makes it easier to scale out by separating writing and reading data into
+different storage systems. This means that data is /eventually consistent/.
+
+#+BEGIN_QUOTE
+The example in this chapter is really convoluted and hard to follow. Five out of
+the seven actors in the example have =Handler= at the end of their name. The
+~CQRSCommandHandler~ and ~ClientCommandHandler~ are rectangles, while others
+have rounded corners and it isn't clear if that is important (maybe because they
+are persistent). The description of why ~ClientCommandHandler~ is required could
+be worded better.
+
+It also might have helped to start the section with an overview of the CQRS
+pattern and what the terms /command/ and /query/ mean.
+
+The other thing that is odd, is that this example hosts the actors in a play
+application still. The interface is clearly not HTTP or WebSockets. The actor is
+spun up using play's dependency injection.
+#+END_QUOTE
+
+Akka supports event sourcing via an extension to the actor model. A persistent
+actor has a ~persistenceId~ that is unique and is used to store and retrieve
+persistent events. During normal operation, a persistent actor receives command,
+validates and processes them, and then calls ~persist~. 
+
+#+BEGIN_SRC scala
+final def persist[A](event : A) (handler : A => Unit): Unit
+#+END_SRC
+
+A handler is called when the event is successfully persisted, which updates the
+actor's state. When an actor crashes, it can be restarted using the journal of
+events. When restarted, the actor goes into recovery mode, where all the events
+from the journal are replayed in order. [[https://doc.akka.io/docs/akka/current/persistence.html?language=scala#snapshots][Snapshots]] can also be used to optimize
+the recovery. Messages will not be processed while the persist method is being
+called.
+
+***** Open questions
+****** TODO Find out what do if a persistent actor has to a side-effects
+For example, should the actor send message to other actors before or after the
+call to persist? If the side-effect is performed after the journal entry is
+persisted, what should happen if the actor crashes after the entry was
+successfully recorded, but before the event was processed by the handler? During
+recovery, the actor has to know when it's safe to perform the side-effect or
+make sure that all downstream side-effects are idempotent.
+
+****** TODO Find out how to handle persistent actor failures to persist state
+****** TODO Find out how to handle poison events in a persistent actor
+
+***** Related Reading
+- [[https://doc.akka.io/docs/akka/current/persistence.html][Akka Persistence]]
+- [[file:akka-in-action.org::#actor-persistence][Akka In Action - Chapter 15 - Actor Persistence]]
+- [[file:functional-and-reactive-domain-modeling.org::#reactive-persistence-and-event-sourcing][Function and Reactive Domain Modeling - Chapter 8 - Reactive persistence and
+  event sourcing]]
+- [[file:reactive-application-development.org::#cqrs-and-event-sourcing][Reactive Application Development - CQRS and Event Sourcing]]
+- [[file:exploring-cqrs-and-event-sourcing.org][Exploring CQRS and Event Sourcing]]
+
+*** Chapter 8 - Responsive user interfaces
 
 ** Review
 
