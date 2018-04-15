@@ -217,3 +217,74 @@ Functions can be created using /lambda expressions/.
 
 In mathematics, the /comprehension/ notation can be used to construct new sets
 from existing sets. An example is \( \{x^2 \mid x \in \{1 \ldots 5\}\} \).
+Haskell has the /list comprehension/ syntax use to construct new lists from
+existing lists. 
+
+#+BEGIN_SRC haskell
+[x^2 + y^2 | x <- [1..5], y <- [4..10]]
+#+END_SRC
+
+The symbol ~|~ is read as /such that/, ~<-~ is called /drawn from/ and the
+expression ~x <- [1..5]~ is called a generator. A list comprehension can have
+multiple generators. The semantics of the multiple generators is the Cartesian
+product of all the generators is generated once for each expression to the left
+of the ~|~ symbol. Generators assign values to a variable and these variables
+can use pattern matching. In addition, list comprehensions can filter values
+from the generators by using guards.
+
+#+BEGIN_SRC haskell
+factors :: Int -> [Int]
+factors n = [x | x <- [1..n], n 'mod' x == 0]
+#+END_SRC
+
+*** Chapter 6 - Recursive functions
+Recursion is the basic mechanism for looping in Haskell. In Haskell, it is
+permissible to define functions in terms of themselves. Recursion is very common
+on lists.
+
+#+BEGIN_SRC haskell
+product :: Num a => [a] -> a
+product []     = 1
+product (n:ns) = n * product ns
+#+END_SRC
+
+Functions with multiple arguments can also be define recursively. What is
+required is a base case for each argument.
+
+#+BEGIN_SRC haskell
+zip :: [a] -> [b] -> [(a,b)]
+zip []     _      = []
+zip _      []     = []
+zip (x:xs) (y:ys) = (x,y) : zip xs ys
+#+END_SRC
+
+Functions can also be defined using /multiple recursion/ where a function is
+applied more than once in its on definition. An example is the ~qsort~ function
+we saw earlier.
+
+#+BEGIN_SRC haskell
+qsort :: Ord a => [a] -> [a]
+qsort []     = []
+qsort (x:xs) = qsort smaller ++ x qsort larger
+               where
+                 smaller = [a | a <- xs, a <= x]
+                 larger  = [b | b <- xs, b > x]
+#+END_SRC
+
+Functions can also be defined using /mutual recursion/, in which two or more
+functions are all defined recursively in terms of each other.
+
+#+BEGIN_QUOTE
+These type of recursive functions are indeed cool, but I haven't found many
+cases of it in practice after nearly 25 years of programming. However, when you
+see an example, it tends to be very /elegant/.
+#+END_QUOTE
+
+The rest of the chapter has some generic advice for writing recursive functions.
+There are five steps are recommended.
+
+1. define the type
+2. enumerate the cases
+3. define the simple cases
+4. define the other cases
+5. generalize and simplify
