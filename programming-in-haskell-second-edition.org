@@ -1,4 +1,4 @@
-* Programming in Haskell - Second 
+* Programming in Haskell - Second Edition
 :PROPERTIES:
 :Title:    Programming in Haskell
 :Author:   Grahamm Hutton
@@ -216,4 +216,4 @@ Functions can be created using /lambda expressions/.
 *** Chapter 5 - List Comprehensions
 
 In mathematics, the /comprehension/ notation can be used to construct new sets
-from existing sets. An example is $ {x^2 \mid x \in {1 \ldots 5}} $.
+from existing sets. An example is \( {x^2 \mid x \in {1 \ldots 5}} \).
